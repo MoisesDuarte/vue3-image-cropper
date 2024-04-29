@@ -1,19 +1,19 @@
 <template>
   <main>
     <section v-if="!state.croppedImage">
-      <input type="file" accept="image/*" @change="onFileChange">      
+      <input type="file" accept="image/*" @change="onFileChange">
       <cropper ref="cropperRef" :src="state.originalImage" :stencil-component='CircleStencil' />
       <button @click="onImageCrop">Crop</button>
     </section>
 
     <section v-if="state.croppedImage">
-      Raw Image:
+      <article>Raw Image:</article>
       <img :src="state.croppedImage" alt="Cropped Image" />
     </section>
 
-    <section v-if="state.finalImage">
-      Compressed Image:
-      <img :src="state.finalImage" alt="Final Image">
+    <section v-if="state.compressedImage">
+      <article>Compressed Image:</article>
+      <img :src="state.compressedImage" alt="Compressed Image">
     </section>
   </main>
 </template>
@@ -23,17 +23,15 @@ import { Cropper, CircleStencil } from 'vue-advanced-cropper';
 import { reactive, ref } from 'vue';
 import 'vue-advanced-cropper/dist/style.css';
 
-const cropperRef = ref(null);
+type TState = {
+  originalImage?: string,
+  croppedImage?: string ,
+  compressedImage?: string
+}
 
-const state: {
-  originalImage: string | null,
-  croppedImage: string | null,
-  finalImage: string | null
-} = reactive({
-  originalImage: null,
-  croppedImage: null,
-  finalImage: null,
-})
+const cropperRef = ref<typeof Cropper>();
+
+const state: TState = reactive({})
 
 const onFileChange = (event: Event) => {
   const { target } = event as Event & { target: EventTarget & HTMLInputElement };
@@ -44,10 +42,10 @@ const onFileChange = (event: Event) => {
 }
 
 const onImageCrop = () => {
-  const { canvas } = cropperRef.value?.getResult();
-
-  if (canvas) {
+  if (cropperRef.value) {
+    const { canvas } = cropperRef.value.getResult();
     state.croppedImage = canvas.toDataURL();
+    state.compressedImage = canvas.toDataURL('image/jpeg', 0.2);
   }
 }
 </script>
